@@ -1,0 +1,67 @@
+@use '@/assets/styles/ui.scss';
+
+.logo-area {
+    color: ui.$colors-ui-white;
+}
+
+.login-page-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-box {
+    width: 100vw;
+    height: 100vh;
+    border: 1px ui.$colors-border solid;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: ui.$colors-ui-black;
+    box-shadow: 4px 4px #888888;
+    row-gap: ui.$spacing-medium-large;
+
+    & div, p {
+        color: ui.$colors-ui-white;
+    }
+
+    padding: ui.$spacing-medium;
+
+    & .input-container {
+        padding: 16px;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .login-box {
+        width: 750px;
+        height: 50vh;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .login-box {
+        width: 500px;
+        height: unset;
+    }
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: ui.$spacing-medium;
+    width: 100%;
+}
+
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: ui.$spacing-large;
+    padding: ui.$spacing-medium;
+}
