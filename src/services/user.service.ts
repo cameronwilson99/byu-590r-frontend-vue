@@ -7,7 +7,7 @@ class UserService {
         return axios.get(API_URL + 'user',
             { headers: authHeader() })
             .then(response => {
-                return response.data.data;
+                return response.data.results;
             });
     }
     uploadAvatar(image) {
@@ -16,14 +16,14 @@ class UserService {
         return axios.post(API_URL + 'user/upload_avatar', formData,
             { headers: authHeader('multipart') })
             .then(response => {
-                return response.data.data;
+                return response.data.results;
             });
     }
     removeAvatar() {
         return axios.delete(API_URL + 'user/remove_avatar',
             { headers: authHeader() })
             .then(response => {
-                return response.data.data;
+                return response.data.results;
             });
     }
     sendVerificationEmail(emailData) {
@@ -39,7 +39,7 @@ class UserService {
             changeEmail,
             { headers: authHeader() })
             .then(response => {
-                return response.data.data;
+                return response.data.results;
             });
     }
 }

@@ -5,7 +5,7 @@ import { mapState } from 'vuex'
 import { ref } from 'vue'
 export default {
   setup() {
-    const theme = ref('dark');
+    const theme = ref('light');
     function changeTheme() {
       theme.value = theme.value === 'light' ? 'dark' : 'light'
     }
@@ -139,7 +139,7 @@ export default {
     <v-spacer></v-spacer>
     <v-btn to="/" default>Home</v-btn>
     <v-btn to="about" default>About</v-btn>
-    <v-btn to="card-games" default>Games</v-btn>
+    <v-btn to="games" default>Games</v-btn>
 
     <v-menu min-width="200px" rounded>
       <template v-slot:activator="{ props }">
