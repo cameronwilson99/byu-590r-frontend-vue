@@ -2,6 +2,8 @@
     <div>
       <h1>Games</h1>
       <v-divider></v-divider>
+      <v-btn color="primary" @click="openCreateDialog">Create</v-btn>
+
       <v-container>
         <v-row v-if="isLoadingGames">
           <v-col>
@@ -15,7 +17,10 @@
               <v-card-text>
                 <h2>{{ game.name }}</h2>
                 <p>{{ game.description }}</p>
-                <p>Publisher ID: {{ game.publisher_id }}</p>
+                <p>Publisher: {{ game.publisher.name }}</p>
+                <p v-for="category in game.categories" :key="category">
+                  <v-chip>{{ category.name }}</v-chip>
+                </p>
                 <p>Price: ${{ game.price }}</p>
                 <p>Stock: {{ game.stock }}</p>
               </v-card-text>
@@ -23,7 +28,6 @@
           </v-col>
         </v-row>
       </v-container>
-  
       <!-- Game Details Modal -->
       <v-dialog v-model="showModal" max-width="600px">
         <v-card v-if="selectedGame">
@@ -38,16 +42,82 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <p>{{ selectedGame.description }}</p>
-                  <p>Publisher ID: {{ selectedGame.publisher_id }}</p>
+                  
+                  <p>Publisher: {{ selectedGame.publisher.name }}</p>
+                  <p v-for="category in selectedGame.categories" :key="category">
+                    <v-chip>{{ category.name }}</v-chip>
+                  </p>
                   <p>Price: ${{ selectedGame.price }}</p>
                   <p>Stock: {{ selectedGame.stock }}</p>
+                  <br>
+                  <p style="font-weight: bold;">Reviews</p>
+                  <p v-for="review in selectedGame.reviews" :key="review">
+                    <v-divider></v-divider>
+                    <p>{{ review.comment }}</p>
+                    <p>Rating: {{ review.rating }}</p>
+                  </p>
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
-            <v-btn color="primary" @click="addToCart(selectedGame)">Add to Cart</v-btn>
+            <v-btn color="green" @click="addToCart(selectedGame)">Add to Cart</v-btn>
+            <v-btn color="info" @click="openEditDialog(selectedGame)">Update</v-btn>
+            <v-btn color="red" @click="openDeleteDialog(selectedGame)">Delete</v-btn>
             <v-btn text @click="closeModal">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="createGameDialog" width="auto">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Add a New Game</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="createGame">
+              <v-text-field v-model="newGame.name" label="Name" required></v-text-field>
+              <v-text-field v-model="newGame.description" label="Description" required></v-text-field>
+              <v-text-field v-model="newGame.publisher_id" label="Publisher ID"></v-text-field>
+              <v-text-field v-model="newGame.price" label="Price" required></v-text-field>
+              <v-text-field v-model="newGame.stock" label="Stock"></v-text-field>
+              <v-file-input accept="image/*" @change="onNewGameFileChange()" v-model="newGame.image" label="Image"></v-file-input>
+              <v-btn type="submit" color="primary">Create</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="editGameDialog" max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Update Game</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form>
+              <v-text-field v-model="editGame.name" label="Name" required></v-text-field>
+              <v-text-field v-model="editGame.description" label="Description" required></v-text-field>
+              <v-text-field v-model="editGame.publisher_id" label="Publisher ID"></v-text-field>
+              <v-text-field v-model="editGame.price" label="Price" required></v-text-field>
+              <v-text-field v-model="editGame.stock" label="Stock"></v-text-field>
+              <v-file-input accept="image/*" @change="onExistingGameFileChange()" label="Image"></v-file-input>
+              <v-btn type="submit" color="primary" @click="updateGame" :loading="isUpdatingGame" :disabled="isUpdatingGame">Update</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="deleteGameDialog" width="auto">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Delete Game</span>
+          </v-card-title>
+          <v-card-text>
+            <p>Are you sure you want to delete this game?</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" @click="deleteGame" :loading="isDeletingGame" :disabled="isDeletingGame">Yes</v-btn>
+            <v-btn text @click="deleteGameDialog = false">No</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -56,4 +126,3 @@
   
 <script src="./GamesView.ts"/>
 <style src="./GamesView.scss"/>
-```

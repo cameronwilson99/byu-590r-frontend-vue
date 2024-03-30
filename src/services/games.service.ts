@@ -23,19 +23,28 @@ class GamesService {
         formData.append('description', data.description);
         formData.append('price', data.price);
         formData.append('stock', data.stock)
-        return axios.post(API_URL + 'games', data, { headers: authHeader() })
+        return axios.post(API_URL + 'games', formData, { headers: authHeader('multipart') })
             .then(response => {
                 return response.data.results;
             });
     }
 
-    // updateGame(id, data) {
-    //     return axios.put(API_URL + `games/${id}`, data, { headers: authHeader() });
-    // }
+    updateGame(data) {
+        return axios.put(API_URL + `games/${data.id}`, data, { headers: authHeader() })
+            .then(response => {
+                console.log('response:', response);
+                return response.data.results;
+            });
+    }
 
-    // deleteGame(id) {
-    //     return axios.delete(API_URL + `games/${id}`, { headers: authHeader() });
-    // }
+    deleteGame(id) {
+        console.log('id:', id)
+        return axios.delete(API_URL + `games/${id}`, { headers: authHeader() })
+            .then(response => {
+                return response.data.results;
+            });
+    }
+
 }
 
 export default new GamesService();
