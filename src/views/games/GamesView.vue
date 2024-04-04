@@ -2,7 +2,8 @@
     <div>
       <h1>Games</h1>
       <v-divider></v-divider>
-      <v-btn color="primary" @click="openCreateDialog">Create</v-btn>
+      <br>
+      <v-btn color="#17BEBB" @click="openCreateDialog">Add a New Game</v-btn>
 
       <v-container>
         <v-row v-if="isLoadingGames">
@@ -17,10 +18,15 @@
               <v-card-text>
                 <h2>{{ game.name }}</h2>
                 <p>{{ game.description }}</p>
+                <template v-if="game.publisher">
+                  <p>Publisher: {{ game.publisher.name }}</p>
+                </template>
                 <p>Publisher: {{ game.publisher.name }}</p>
-                <p v-for="category in game.categories" :key="category">
-                  <v-chip>{{ category.name }}</v-chip>
-                </p>
+                <template v-if="game.categories && game.categories.length > 0">
+                  <p v-for="category in game.categories" :key="category">
+                    <v-chip>{{ category.name }}</v-chip>
+                  </p>
+                </template>
                 <p>Price: ${{ game.price }}</p>
                 <p>Stock: {{ game.stock }}</p>
               </v-card-text>
@@ -69,7 +75,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="createGameDialog" width="auto">
+      <v-dialog v-model="createGameDialog" width="500px">
         <v-card>
           <v-card-title>
             <span class="headline">Add a New Game</span>

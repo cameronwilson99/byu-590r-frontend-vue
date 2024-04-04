@@ -5,21 +5,6 @@ const initialState = { gamesList: [] };
 export const games = {
     namespaced: true,
     state: initialState,
-    data: function() {
-        return {
-            newGame: {
-                title: '',
-                description: '',
-                price: 0,
-                image: ''
-            },
-            createGameDialog: false,
-            editBook: null,
-            editBookDialog: false,
-            deleteBook: null,
-            deleteBookDialog: false
-        }
-    },
     actions: {
         getGames({ commit }) {
             return GamesService.getGames().then(
@@ -36,8 +21,8 @@ export const games = {
         createGame({ commit }, game) {
             return GamesService.createGame(game).then(
                 response => {
-                    commit('addGame', response.game);
-                    return Promise.resolve(response.game);
+                    commit('addGame', response);
+                    return Promise.resolve(response);
                 },
                 error => {
                     return Promise.reject(error);
@@ -59,9 +44,9 @@ export const games = {
         deleteGame({ commit, getters }, game) {
             return GamesService.deleteGame(game).then(
                 response => {
-                    response.game.index = getters.getStateIndexById(response.game.id);
-                    commit('deleteGame', response.game);
-                    return Promise.resolve(response.game);
+                    response.index = getters.getStateIndexById(response.id);
+                    commit('deleteGame', response);
+                    return Promise.resolve(response);
                 },
                 error => {
                     return Promise.reject(error);
@@ -86,7 +71,7 @@ export const games = {
             state.gamesList[game.index] = game;
         },
         deleteGame(state, game) {
-            state.gamesList.splice(game.index + 1, 1);
+            state.gamesList.splice(game.index, 1);
         },
         updateGameImage(state, game) {
             state.gamesList[game.index].image = game.image;

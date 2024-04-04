@@ -17,6 +17,7 @@ export default {
             newGame: {
                 title: '',
                 description: '',
+                publisher_id: '',
                 price: 0,
                 image: ''
             },
@@ -120,21 +121,23 @@ export default {
             this.isDeletingGame = true;
             this.$store.dispatch('games/deleteGame', this.selectedGameToDelete.id)
                 .then(() => {
-                    this.selectedGameToDelete = null;
+                    console.log(this.deleteGameDialog);
                     this.deleteGameDialog = false;
                     this.isDeletingGame = false;
+                    this.selectedGameToDelete = null;
                 })
                 .catch(() => {
                     this.isDeletingGame = false;
                 });
         },
         onNewGameFileChange(e) {
-            this.newGame.image = null
             var image = e.target.files[0] || e.dataTransfer.files[0];
 
             if (!image.length) {
                 return;
             }
+
+            this.newGame.image = image[0];
         },
         onExistingGameFileChange(e) {
             var image = e.target.files[0] || e.dataTransfer.files[0];

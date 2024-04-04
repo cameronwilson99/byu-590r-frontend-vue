@@ -140,11 +140,10 @@ export default {
     <v-btn to="/" default>Home</v-btn>
     <v-btn to="about" default>About</v-btn>
     <v-btn to="games" default>Games</v-btn>
-
     <v-menu min-width="200px" rounded>
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props">
-          <v-avatar color="purple" size="large">
+          <v-avatar color="#0E7C7B" size="large">
             <v-img icon v-bind="props" v-if="avatarURL" alt="Avatar" :src="avatarURL"></v-img>
             <v-icon v-bind="props" v-else :color="profile.color" :icon="profile.icon"></v-icon>
           </v-avatar>

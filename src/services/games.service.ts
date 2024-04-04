@@ -21,11 +21,15 @@ class GamesService {
         let formData = new FormData();
         formData.append('name', data.name);
         formData.append('description', data.description);
+        formData.append('publisher_id', data.publisher_id);
         formData.append('price', data.price);
         formData.append('stock', data.stock)
+        formData.append('image', data.image[0]);
+        console.log(data.image)
         return axios.post(API_URL + 'games', formData, { headers: authHeader('multipart') })
             .then(response => {
-                return response.data.results;
+                console.log(response.data.results.game)
+                return response.data.results.game;
             });
     }
 
@@ -41,6 +45,7 @@ class GamesService {
         console.log('id:', id)
         return axios.delete(API_URL + `games/${id}`, { headers: authHeader() })
             .then(response => {
+                console.log('response:', response.data.results);
                 return response.data.results;
             });
     }
