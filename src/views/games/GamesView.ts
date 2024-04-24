@@ -2,13 +2,6 @@ import { mapState } from 'vuex';
 //import { useDisplay } from 'vuetify';
 export default {
     name: 'GamesView',
-    computed: {
-        ...mapState({
-            games() {
-                return this.$store.state.games.gamesList;
-            }
-        })
-    },
     data: function() {
         return {
             isLoadingGames: true,
@@ -19,6 +12,7 @@ export default {
                 description: '',
                 publisher_id: '',
                 price: 0,
+                categories: [],
                 image: ''
             },
             createGameDialog: false,
@@ -32,8 +26,47 @@ export default {
             editImageChangeDialogBtn: false
         }
     },
+    computed: {
+        ...mapState({
+            games() {
+                return this.$store.state.games.gamesList;
+            },
+            categories() {
+                return this.$store.state.games.categories;
+            },
+            publishers() {
+                return this.$store.state.games.publishers;
+            }
+        }),
+        nameErrors() {
+            return this.newGame.name ? [] : ['Name is required'];
+        },
+        descriptionErrors() {
+            return this.newGame.description ? [] : ['Description is required'];
+        },
+        publisherErrors() {
+            return this.newGame.publisher_id ? [] : ['Publisher is required'];
+        },
+        priceErrors() {
+            return this.newGame.price ? [] : ['Price is required'];
+        },
+        categoriesErrors() {
+            return this.newGame.categories.length ? [] : ['Categories are required'];
+        },
+        hasErrors() {
+            return (
+                this.nameErrors.length ||
+                this.descriptionErrors.length ||
+                this.publisherErrors.length ||
+                this.priceErrors.length ||
+                this.categoriesErrors.length
+            );
+        }
+    },
     created() {
         this.getGames();
+        this.getCategories();
+        this.getPublishers();
     },
     methods: {
         getGames() {
@@ -43,6 +76,24 @@ export default {
                 })
                 .catch(() => {
                     this.$display.error('Error getting games');
+                });
+        },
+        getCategories() {
+            this.$store.dispatch('games/getCategories')
+                .then(() => {
+                    this.isLoadingGames = false;
+                })
+                .catch(() => {
+                    this.$display.error('Error getting categories');
+                });
+        },
+        getPublishers() {
+            this.$store.dispatch('games/getPublishers')
+                .then(() => {
+                    this.isLoadingGames = false;
+                })
+                .catch(() => {
+                    this.$display.error('Error getting publishers');
                 });
         },
         showGameDetails(game) {
@@ -60,7 +111,9 @@ export default {
             this.newGame = {
                 title: '',
                 description: '',
+                publisher_id: '',
                 price: 0,
+                categories: [],
                 image: ''
             };
             this.createGameDialog = true;
@@ -78,7 +131,9 @@ export default {
             this.newGame = {
                 title: '',
                 description: '',
+                publisher_id: '',
                 price: 0,
+                categories: [],
                 image: ''
             };
             this.createGameDialog = false;
@@ -92,6 +147,9 @@ export default {
             this.deleteGameDialog = false;
         },
         createGame() {
+            if (this.hasErrors) {
+                return;
+            }
             this.isCreatingGame = true;
             this.$store.dispatch('games/createGame', this.newGame)
                 .then(() => {
@@ -99,7 +157,10 @@ export default {
                     this.isCreatingGame = false;
                 })
                 .catch(() => {
-                    this.$display.error('Error creating game');
+                    console.log('Error creating game');
+                    if (this.hasErrors) {
+                        return;
+                    }
                     this.isCreatingGame = false;
                 });
         },
@@ -131,6 +192,7 @@ export default {
                 });
         },
         onNewGameFileChange(e) {
+            console.log('New game file change:', e)
             var image = e.target.files[0] || e.dataTransfer.files[0];
 
             if (!image.length) {

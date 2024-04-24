@@ -1,6 +1,6 @@
 import GamesService from '../services/games.service';
 
-const initialState = { gamesList: [] };
+const initialState = { gamesList: [], categories: [], publishers: []};
 
 export const games = {
     namespaced: true,
@@ -14,6 +14,28 @@ export const games = {
                 },
                 error => {
                     commit('setGamesFailure');
+                    return Promise.reject(error);
+                }
+            );
+        },
+        getCategories({ commit }) {
+            return GamesService.getCategories().then(
+                categories => {
+                    commit('setCategories', categories);
+                    return Promise.resolve(categories);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        getPublishers({ commit }) {
+            return GamesService.getPublishers().then(
+                publishers => {
+                    commit('setPublishers', publishers);
+                    return Promise.resolve(publishers);
+                },
+                error => {
                     return Promise.reject(error);
                 }
             );
@@ -60,6 +82,12 @@ export const games = {
                 game.price = game.price.toFixed(2);
                 return game;
             });
+        },
+        setCategories(state, categories) {
+            state.categories = categories;
+        },
+        setPublishers(state, publishers) {
+            state.publishers = publishers;
         },
         getGamesFailure(state) {
             state.gamesList = [];

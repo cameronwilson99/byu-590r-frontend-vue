@@ -3,7 +3,7 @@
       <h1>Games</h1>
       <v-divider></v-divider>
       <br>
-      <v-btn color="#17BEBB" @click="openCreateDialog">Add a New Game</v-btn>
+      <v-btn color="#17BEBB" style="color: white;" @click="openCreateDialog">Add a New Game</v-btn>
 
       <v-container>
         <v-row v-if="isLoadingGames">
@@ -21,7 +21,6 @@
                 <template v-if="game.publisher">
                   <p>Publisher: {{ game.publisher.name }}</p>
                 </template>
-                <p>Publisher: {{ game.publisher.name }}</p>
                 <template v-if="game.categories && game.categories.length > 0">
                   <p v-for="category in game.categories" :key="category">
                     <v-chip>{{ category.name }}</v-chip>
@@ -82,13 +81,18 @@
           </v-card-title>
           <v-card-text>
             <v-form @submit.prevent="createGame">
+              <v-alert v-if=hasErrors type="warning" dismissible>
+                Please make sure all fields are filled out correctly. Each field is required.
+              </v-alert>
+              <br>
               <v-text-field v-model="newGame.name" label="Name" required></v-text-field>
               <v-text-field v-model="newGame.description" label="Description" required></v-text-field>
-              <v-text-field v-model="newGame.publisher_id" label="Publisher ID"></v-text-field>
-              <v-text-field v-model="newGame.price" label="Price" required></v-text-field>
-              <v-text-field v-model="newGame.stock" label="Stock"></v-text-field>
-              <v-file-input accept="image/*" @change="onNewGameFileChange()" v-model="newGame.image" label="Image"></v-file-input>
-              <v-btn type="submit" color="primary">Create</v-btn>
+              <v-select v-model="newGame.publisher_id" :items="publishers" item-title="name" item-value="id" label="Publisher" required></v-select>
+              <v-text-field v-model="newGame.price" label="Price" required type="number"></v-text-field>
+              <v-text-field v-model="newGame.stock" label="Stock" required type="number"></v-text-field>
+              <v-select v-model="newGame.categories" :items="categories" item-title="name" item-value="id" multiple chips label="Categories" required></v-select>
+              <v-file-input accept="image/*" @change="onNewGameFileChange($event)" v-model="newGame.image" label="Image"></v-file-input>
+              <v-btn type="submit" color="primary" :loading="isCreatingGame" :disabled="isCreatingGame || hasErrors==1">Create</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -103,9 +107,10 @@
             <v-form>
               <v-text-field v-model="editGame.name" label="Name" required></v-text-field>
               <v-text-field v-model="editGame.description" label="Description" required></v-text-field>
-              <v-text-field v-model="editGame.publisher_id" label="Publisher ID"></v-text-field>
+              <v-select v-model="editGame.publisher_id" :items="publishers" item-title="name" item-value="id" label="Publisher"></v-select>
               <v-text-field v-model="editGame.price" label="Price" required></v-text-field>
               <v-text-field v-model="editGame.stock" label="Stock"></v-text-field>
+              <v-select v-model="editGame.category_ids" :items="categories" item-title="name" item-value="id" multiple chips label="Categories"></v-select>
               <v-file-input accept="image/*" @change="onExistingGameFileChange()" label="Image"></v-file-input>
               <v-btn type="submit" color="primary" @click="updateGame" :loading="isUpdatingGame" :disabled="isUpdatingGame">Update</v-btn>
             </v-form>

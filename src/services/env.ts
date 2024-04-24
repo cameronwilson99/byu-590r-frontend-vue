@@ -1,2 +1,2 @@
-let API_URL = 'http://127.0.0.1:8000/api/';
+let API_URL = 'http://23.22.4.129:8888/api/';
 export default API_URL;

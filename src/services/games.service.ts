@@ -10,6 +10,20 @@ class GamesService {
             });
     }
 
+    getCategories() {
+        return axios.get(API_URL + 'categories', { headers: authHeader() })
+            .then(response => {
+                return response.data.results;
+            });
+    }
+
+    getPublishers() {
+        return axios.get(API_URL + 'publishers', { headers: authHeader() })
+            .then(response => {
+                return response.data.results;
+            });
+    }
+
     getGame(id) {
         return axios.get(API_URL + `games/${id}`, { headers: authHeader() })
             .then(response => {
@@ -24,8 +38,9 @@ class GamesService {
         formData.append('publisher_id', data.publisher_id);
         formData.append('price', data.price);
         formData.append('stock', data.stock)
+        formData.append('categories', data.categories);
         formData.append('image', data.image[0]);
-        console.log(data.image)
+        console.log('formData:', data.name, data.description, data.publisher_id, data.price, data.stock, data.categories, data.image[0])
         return axios.post(API_URL + 'games', formData, { headers: authHeader('multipart') })
             .then(response => {
                 console.log(response.data.results.game)
