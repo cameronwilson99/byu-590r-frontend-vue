@@ -1,85 +1,193 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+<script  lang="ts">
+import { RouterView } from 'vue-router'
+import LoginView from './views/login/LoginView.vue'
+import { mapState } from 'vuex'
+import { ref } from 'vue'
+export default {
+  setup() {
+    const theme = ref('light');
+    function changeTheme() {
+      theme.value = theme.value === 'light' ? 'dark' : 'light'
+    }
+    return { theme, changeTheme };
+  },
+  name: 'App',
+  components: {
+    LoginView,
+    //RouterLink,
+    RouterView
+  },
+  data: function () {
+    return {
+      profileDialog: false,
+      profileIsUploading: false,
+      verificationEmailLoading: false,
+      showEmailNotVerifiedDialog: false,
+      showChangeEmailTextField: false,
+      changeEmail: false,
+      successVerificationMessage: '',
+      changeEmailRules: [
+        value => !!value || 'Required.',
+        value => (value && value.length >= 3) || 'Min 3 characters',
+      ],
+      profile:
+      {
+        avatar: '',
+        name: '',
+        title: '',
+        icon: 'mdi-account-circle',
+        color: 'blue'
+      },
+      profilePictureImage: '',
+      profilePictureChangeLabel: 'Change Profile Picture',
+      emailOfVerification: ''
+    }
+  },
+
+  computed: {
+    ...mapState({
+      user() {
+        return this.$store.state.user.user;
+      },
+      auth() {
+        return this.$store.state.auth;
+      },
+      authUser() {
+        return this.auth.user;
+      },
+      isAuthenticated() {
+        return this.auth.status.loggedIn && (this.authUser.token !== undefined);
+      },
+      title() {
+        return 'Welcome ' + this.authUser.name + '!'
+      },
+      avatarURL() {
+        return this.auth.user.avatar;
+      }
+    }),
+  },
+  updated() {
+    if (this.isAuthenticated) {
+      this.$router.push({ name: 'home' });
+    }
+  },
+  created() {
+    if (this.authUser) {
+      this.getCurrentUser();
+    }
+  },
+  methods: {
+   logout() {
+     this.$store.dispatch("auth/logout");
+   },
+   checkAuth(auth) {
+     console.log('Authenticated!', auth)
+   },
+   getCurrentUser() {
+    console.log('Getting current user')
+    this.profile.name = this.authUser.name;
+
+    this.profile.title = this.title;
+    this.$store.dispatch("user/getUser").then(
+      (response) => {
+        if (response.avatar) {
+          this.$store.commit("auth/uploadAvatarSuccess", response.avatar);
+        }
+        if (!response.email_verified_at) {
+          this.showEmailNotVerifiedDialog = true;
+        }
+      }
+    )
+  },
+  removeAvatar() {
+    this.profileIsUploading = true;
+    this.$store.dispatch("user/removeAvatar").then(
+      (response) => {
+        this.$store.commit("auth/uploadAvatarSuccess", response.avatar);
+        this.profileIsUploading = false;
+      },
+    ).catch((error) => {
+      console.log(error);
+      alert('Error. Try again');
+      this.profileIsUploading = false;
+    });
+  },
+  onAvatarChange(e) {
+    var image = e.target.files || e.dataTransfer.files;
+
+    if (!image.length)
+      return;
+    this.profileIsUploading = true;
+    this.$store.dispatch("user/uploadAvatar", image[0], { root: true }).then(
+      (response) => {
+        this.$store.commit("auth/uploadAvatarSuccess", response.avatar);
+        this.profileIsUploading = false;
+      },
+
+    ).catch((error) => {
+      console.log(error);
+      alert('Error. Try again');
+      this.profileIsUploading = false;
+    });
+  },
+ }
+}
 </script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+ <v-app :theme="theme">
+   <v-app-bar v-if="isAuthenticated">
+    <v-spacer></v-spacer>
+    <v-btn to="/" default>Home</v-btn>
+    <v-btn to="about" default>About</v-btn>
+    <v-btn to="games" default>Games</v-btn>
+    <v-menu min-width="200px" rounded>
+      <template v-slot:activator="{ props }">
+        <v-btn icon v-bind="props">
+          <v-avatar color="#0E7C7B" size="large">
+            <v-img icon v-bind="props" v-if="avatarURL" alt="Avatar" :src="avatarURL"></v-img>
+            <v-icon v-bind="props" v-else :color="profile.color" :icon="profile.icon"></v-icon>
+          </v-avatar>
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-text>
+          <div class="mx-auto text-center">
+            <h3>{{ profile.name }}</h3>
+            <v-divider class="my-3"></v-divider>
+            <v-btn :prepend-icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'" @click="changeTheme">Toggle Theme</v-btn>
+            <v-btn @click="profileDialog = true">Profile</v-btn>
+            <v-divider class="my-3"></v-divider>
+            <v-btn @click="logout();">Logout</v-btn>
+          </div> 
+        </v-card-text> 
+      </v-card> 
+    </v-menu>
+   </v-app-bar>
 
-    <div class="wrapper">
-      <HelloWorld msg="Cameron Wilson - 1/26/2024 6:58 PM" />
+   <v-main>
+     <v-container>
+       <div v-if="isAuthenticated">
+         <RouterView />
+       </div>
+       <LoginView v-else :is-authenticated="isAuthenticated" @authenticate="checkAuth($event)" />
+     </v-container>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+     <v-dialog v-model="profileDialog">
+      <v-form>
+        <v-card>
+          <v-card-title>Profile</v-card-title>
+          <v-card-subtitle>Manage your profile</v-card-subtitle>
+          <v-card class="mx-auto" min-width="500" max-width="800" rounded="0">
+            <v-img cover v-if="avatarURL" :src="avatarURL"></v-img>
+            <v-icon v-else :color="profile.color" :icon="profile.icon"></v-icon>
+            <v-file-input accept="image/*" @change="onAvatarChange" :loading="profileIsUploading" :label="profilePictureChangeLabel" :disabled="profileIsUploading"></v-file-input>
+          </v-card>
+          <v-card-actions>
+            <v-btn @click="removeAvatar">Remove Profile Picture</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
+     </v-dialog>
+   </v-main>
+ </v-app>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
